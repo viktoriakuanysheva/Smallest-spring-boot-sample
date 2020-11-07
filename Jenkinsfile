@@ -42,9 +42,13 @@ pipeline {
                         docker.image('victoriakuanysheva/smallest-spring-app:latest').withRun("--network ${n} --name app") { c ->
                             docker.image('curlimages/curl').inside("--network ${n}") {
                                 sh """
-                                sleep 10;
-                                curl app:8080;
+                                sleep 20;
                                 """
+                                def response = sh returnStdout: true, script: "curl -s -o /dev/null -w '%{http_code}' app:8080"
+                                echo 'Code is ' + response
+                                if(response != "200") {
+                                    error("Response is ${response}")
+                                }
                             }
                         }
                     }
